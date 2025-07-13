@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-vertica",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Vertica Database n8n node",
   "keywords": [
     "n8n-community-node-package"
