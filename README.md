@@ -2,6 +2,8 @@
 
 This is a node for n8n that is used to execute SQL queries against Vertica database.
 
+It also supports executing multiple queries in a single request by splitting the query with `--split--`.
+
 ## Development
 
 1. Clone the repository

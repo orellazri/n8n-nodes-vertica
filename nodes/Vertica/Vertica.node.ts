@@ -77,14 +77,27 @@ export class Vertica implements INodeType {
 				const operation = this.getNodeParameter('operation', i) as string;
 
 				if (operation === 'executeQuery') {
-					const query = this.getNodeParameter('query', i) as string;
-
 					const client = new vertica.Client(connectionConfig);
 					await client.connect();
-					const result = await client.query(query);
 
-					if (result.rows && result.rows.length > 0) {
-						for (const row of result.rows) {
+					const query = this.getNodeParameter('query', i) as string;
+
+					// Split query into multiple queries if it contains multiple statements
+					const queries = query.split('--split--');
+					let allResults: any[] = [];
+					let totalAffectedRows = 0;
+
+					for (const q of queries) {
+						const result = await client.query(q);
+						if (result.rows && result.rows.length > 0) {
+							allResults = allResults.concat(result.rows);
+						} else {
+							totalAffectedRows += result.rowCount || 0;
+						}
+					}
+
+					if (allResults.length > 0) {
+						for (const row of allResults) {
 							returnData.push({
 								json: row,
 								pairedItem: { item: i },
@@ -92,7 +105,7 @@ export class Vertica implements INodeType {
 						}
 					} else {
 						returnData.push({
-							json: { success: true, affectedRows: result.rowCount || 0 },
+							json: { success: true, affectedRows: totalAffectedRows },
 							pairedItem: { item: i },
 						});
 					}
